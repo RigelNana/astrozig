@@ -32,6 +32,21 @@ pub const Week = enum {
     Saturday,
 };
 
+pub fn weekdayFromDate(date: Date) error{invalidDate}!Week {
+    const JD = julianDay(date);
+    const day = @mod(@as(i32, @intFromFloat(JD + 1.5)), 7);
+    return switch (day) {
+        0 => Week.Sunday,
+        1 => Week.Monday,
+        2 => Week.Tuesday,
+        3 => Week.Wednesday,
+        4 => Week.Thursday,
+        5 => Week.Friday,
+        6 => Week.Saturday,
+        else => error.invalidDate,
+    };
+}
+
 pub fn isLeapYear(year: i32, cal_type: CalType) bool {
     switch (cal_type) {
         CalType.Gregorian => {
@@ -116,19 +131,45 @@ test "isLeapYear" {
 }
 
 test "dateFromJulianDay" {
+    const JD1: f64 = 2436116.31;
     const JD2: f64 = 2451545.0;
+    const JD3: f64 = 1842713.0;
+    const date1 = try dateFromJulianDay(JD1);
     const date2 = try dateFromJulianDay(JD2);
-    std.debug.print("{d},{d},{d}", .{ date2.year, date2.month, date2.decimalDay });
+    const date3 = try dateFromJulianDay(JD3);
+    try std.testing.expectEqual(date1.year, 1957);
+    try std.testing.expectEqual(date1.month, 10);
+    try std.testing.expectApproxEqAbs(date1.decimalDay, 4.81, 0.000001);
     try std.testing.expectEqual(date2.year, 2000);
     try std.testing.expectEqual(date2.month, 1);
     try std.testing.expectApproxEqAbs(date2.decimalDay, 1.5, 0.000001);
+    try std.testing.expectEqual(date3.year, 333);
+    try std.testing.expectEqual(date3.month, 1);
+    try std.testing.expectApproxEqAbs(date3.decimalDay, 27.5, 0.000001);
 }
 
 test "julianDay" {
     const date1 = Date{ .year = 1957, .month = 10, .decimalDay = 4.81, .calType = CalType.Gregorian };
     const date2 = Date{ .year = 333, .month = 1, .decimalDay = 27.5, .calType = CalType.Julian };
+    const date3 = Date{ .year = 2000, .month = 1, .decimalDay = 1.5, .calType = CalType.Gregorian };
+    const date4 = Date{ .year = -123, .month = 12, .decimalDay = 31.0, .calType = CalType.Julian };
+    const date5 = Date{ .year = -4712, .month = 1, .decimalDay = 1.5, .calType = CalType.Julian };
     const JD1 = julianDay(date1);
     const JD2 = julianDay(date2);
+    const JD3 = julianDay(date3);
+    const JD4 = julianDay(date4);
+    const JD5 = julianDay(date5);
     try std.testing.expectApproxEqAbs(JD1, 2436116.31, 0.000001);
     try std.testing.expectApproxEqAbs(JD2, 1842713.0, 0.000001);
+    try std.testing.expectApproxEqAbs(JD3, 2451545.0, 0.000001);
+    try std.testing.expectApproxEqAbs(JD4, 1676496.5, 0.000001);
+    try std.testing.expectApproxEqAbs(JD5, 0.0, 0.000001);
+}
+
+test "weekdayFromDate" {
+    const date1 = Date{ .year = 2024, .month = 11, .decimalDay = 28, .calType = CalType.Gregorian };
+
+    const week1 = weekdayFromDate(date1);
+
+    try std.testing.expectEqual(week1, Week.Thursday);
 }

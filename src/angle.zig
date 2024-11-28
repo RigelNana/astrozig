@@ -1,29 +1,29 @@
 const std = @import("std");
 const math = std.math;
 
-inline fn degFromDMS(deg: i64, min: i64, sec: f64) f64 {
+pub inline fn degFromDMS(deg: i64, min: i64, sec: f64) f64 {
     const m, const s = if (deg < 0) .{ -@as(i64, @intCast(@abs(min))), -@abs(sec) } else .{ @as(i64, @intCast(@abs(min))), @abs(sec) };
     return @as(f64, @floatFromInt(deg)) + @as(f64, @floatFromInt(m)) / 60.0 + s / 3600.0;
 }
 
-inline fn dmsFromDeg(deg: f64) struct { d: i64, m: i64, s: f64 } {
+pub inline fn dmsFromDeg(deg: f64) struct { d: i64, m: i64, s: f64 } {
     const d: i64 = @intFromFloat(deg);
     const m: i64 = @intFromFloat((deg - @as(f64, @floatFromInt(d))) * 60.0);
     const s = (deg - @as(f64, @floatFromInt(d)) - @as(f64, @floatFromInt(m)) / 60.0) * 3600.0;
     return .{ .d = d, .m = m, .s = s };
 }
-inline fn degFromHMS(h: i64, m: i64, s: f64) f64 {
+pub inline fn degFromHMS(h: i64, m: i64, s: f64) f64 {
     return 15.0 * (@as(f64, @floatFromInt(h)) + @as(f64, @floatFromInt(m)) / 60.0 + s / 3600.0);
 }
 
-inline fn hmsFromDeg(deg: f64) struct { h: i64, m: i64, s: f64 } {
+pub inline fn hmsFromDeg(deg: f64) struct { h: i64, m: i64, s: f64 } {
     const h: i64 = @intFromFloat(deg / 15.0);
     const m: i64 = @intFromFloat((deg / 15.0 - @as(f64, @floatFromInt(h))) * 60.0);
     const s: f64 = (deg / 15.0 - @as(f64, @floatFromInt(h)) - @as(f64, @floatFromInt(m)) / 60.0) * 3600.0;
     return .{ .h = h, .m = m, .s = s };
 }
 
-inline fn limitTo360(deg: f64) f64 {
+pub inline fn limitTo360(deg: f64) f64 {
     const n: i64 = @intFromFloat(deg / 360.0);
     var limited: f64 = deg - @as(f64, @floatFromInt(n)) * 360.0;
     if (limited < 0.0) {
@@ -32,7 +32,7 @@ inline fn limitTo360(deg: f64) f64 {
     return limited;
 }
 
-inline fn limitTo2PI(angle: f64) f64 {
+pub inline fn limitTo2PI(angle: f64) f64 {
     const n: i64 = @intFromFloat(angle / (2.0 * math.pi));
     var limited: f64 = angle - @as(f64, @floatFromInt(n)) * 2.0 * math.pi;
     if (limited < 0.0) {
